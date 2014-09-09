@@ -1,0 +1,24 @@
+{
+  "name": "option-tree",
+  "description": "a data source for a unidirectional combobox with nested options",
+  "version": "0.0.0",
+  "repository": {
+    "url": "nrw/option-tree"
+  },
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "tape test/*.js",
+    "watch": "nodemon -q -x 'tape test/*.js' | tap-colorize"
+  },
+  "dependencies": {
+    "observ": "^0.2.0",
+    "observ-array": "^2.0.0",
+    "observ-struct": "^5.0.1",
+    "option-select-action": "^0.3.0",
+    "option-tree-filter": "^1.1.0",
+    "option-tree-navigate": "^0.3.0",
+    "tape": "2.x.x"
+  },
+  "devDependencies": {}
+}
