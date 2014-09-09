@@ -1,22 +1,18 @@
 ## option-tree
 
-  - next - selNext
-  - prev - selPrev
-  - select(option)
-  - active() -> any
-  - isActive(any) -> bool
+- next - selNext
+- prev - selPrev
+- select(option)
+- active() -> any
+- isActive(any) -> bool
 
-  - options() -> array
-  - value() -> array
+- options() -> array
+- value() -> array
+- actions()
+- filter() -> function
 
-  - setQuery(string)
-  - setOptions()
-  - setValue()
-
-  # action implementation also has
-  - setActions(array of fns)
-  - actions()
-
-  # maybe
-  - filter() -> function
-  - setFilter(fn)
+- setQuery(string)
+- setOptions()
+- setValue()
+- setActions(array of fns)
+- setFilter(fn)
