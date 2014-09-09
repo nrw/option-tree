@@ -17,6 +17,7 @@ function TreeData (data, opts) {
   var query = Observ(data.query)
   var value = ObservArray(data.value || [])
   var actions = Observ(data.actions || {})
+  var active = Observ(null)
 
   var filtered = Computed([
     options, filter, query, value
@@ -30,16 +31,14 @@ function TreeData (data, opts) {
     value: value,
     query: query,
     filter: filter,
-
+    active: active,
+    actions: actions,
     filtered: filtered,
     tree: Computed([filtered], function (filtered) {
       return NavTree(filtered)
     }),
-
     store: Computed([actions, value], function (actions, value) {
       return SelectAction(actions, value, opts)
-    }),
-    active: Observ(null),
-    actions: actions
+    })
   })
 }

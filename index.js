@@ -15,6 +15,12 @@ function OptionTree (data, opts) {
   // select first item
   navigate(data, 'nextWith')
 
+  data.filtered(snap)
+  data.value(snap)
+  data.options(snap)
+
+  function snap () { navigate(data, 'nearestWith') }
+
   return {
     // exports
     state: data,
