@@ -1,7 +1,7 @@
 {
   "name": "option-tree",
   "description": "a data source for a unidirectional combobox with nested options",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "repository": {
     "url": "nrw/option-tree"
   },
