@@ -7,9 +7,9 @@ var tree
 test('navigate active option', function (t) {
   tree = OptionTree({
     options: [
-      {id: 'a'},
-      {id: 'b'},
-      {id: 'c'}
+      {value: 'a'},
+      {value: 'b'},
+      {value: 'c'}
     ]
   })
 
@@ -40,23 +40,23 @@ test('navigate active option', function (t) {
 test('selections', function (t) {
   tree = OptionTree({
     options: [
-      {id: 'a'},
-      {id: 'b'},
-      {id: 'c'}
+      {value: 'a'},
+      {value: 'b'},
+      {value: 'c'}
     ]
   })
 
   tree.select(tree.active())
-  t.same(tree.value(), [{id: 'a'}])
+  t.same(tree.value(), [{value: 'a'}])
   t.same(tree.active(), [0])
 
   tree.next()
   tree.select(tree.active())
   t.same(tree.active(), [1])
-  t.same(tree.value(), [{id: 'a'}, {id: 'b'}])
+  t.same(tree.value(), [{value: 'a'}, {value: 'b'}])
 
   tree.pop()
-  t.same(tree.value(), [{id: 'a'}])
+  t.same(tree.value(), [{value: 'a'}])
 
   t.end()
 })
@@ -64,14 +64,14 @@ test('selections', function (t) {
 test('filter and query', function (t) {
   tree = OptionTree({
     options: [
-      {id: 'a'},
-      {id: 'b'},
-      {id: 'c'}
+      {value: 'a'},
+      {value: 'b'},
+      {value: 'c'}
     ],
     filter: function (option, query, value) {
       // omit selected
       for (var i = value.length - 1; i >= 0; i--) {
-        if (option.id === value[i].id) return {
+        if (option.value === value[i].value) return {
           keep: false
         }
       }
@@ -79,26 +79,26 @@ test('filter and query', function (t) {
     }
   })
 
-  t.same(tree.filtered(), [{id: 'a'}, {id: 'b'}, {id: 'c'}])
+  t.same(tree.filtered(), [{value: 'a'}, {value: 'b'}, {value: 'c'}])
   t.same(tree.value(), [])
   tree.select([0])
-  t.same(tree.value(), [{id: 'a'}])
-  t.same(tree.filtered(), [{id: 'b'}, {id: 'c'}])
+  t.same(tree.value(), [{value: 'a'}])
+  t.same(tree.filtered(), [{value: 'b'}, {value: 'c'}])
   t.end()
 })
 
 test('modify options and value with actions', function (t) {
   tree = OptionTree({
     options: [
-      {id: 'create'},
-      {id: 'b'},
-      {id: 'c'}
+      {value: 'create'},
+      {value: 'b'},
+      {value: 'c'}
     ],
     filter: function (option, query, value) {
-      if (option.id === 'create') return {keep: true}
+      if (option.value === 'create') return {keep: true}
 
       try {
-        if (new RegExp(query, 'i').test(option.id)) {
+        if (new RegExp(query, 'i').test(option.value)) {
           return true
         }
       } catch (e) {}
@@ -108,21 +108,21 @@ test('modify options and value with actions', function (t) {
     actions: {
       create: function (opt, query) {
         var all = tree.options()
-        all.push({id: query})
+        all.push({value: query})
         tree.setOptions(all)
         tree.setQuery('')
       }
     }
   })
 
-  t.same(tree.options(), [{id: 'create'}, {id: 'b'}, {id: 'c'}])
+  t.same(tree.options(), [{value: 'create'}, {value: 'b'}, {value: 'c'}])
   tree.setQuery('hi')
-  t.same(tree.filtered(), [{id: 'create'}])
+  t.same(tree.filtered(), [{value: 'create'}])
 
   tree.select([0])
-  t.same(tree.options(), [{id: 'create'}, {id: 'b'}, {id: 'c'}, {id: 'hi'}])
-  t.same(tree.filtered(), [{id: 'create'}, {id: 'b'}, {id: 'c'}, {id: 'hi'}])
+  t.same(tree.options(), [{value: 'create'}, {value: 'b'}, {value: 'c'}, {value: 'hi'}])
+  t.same(tree.filtered(), [{value: 'create'}, {value: 'b'}, {value: 'c'}, {value: 'hi'}])
   tree.setQuery('hi')
-  t.same(tree.filtered(), [{id: 'create'}, {id: 'hi'}])
+  t.same(tree.filtered(), [{value: 'create'}, {value: 'hi'}])
   t.end()
 })

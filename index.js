@@ -6,7 +6,7 @@ function OptionTree (data, opts) {
   var tree, store, filter, state
 
   opts = opts || {}
-  opts.keyField = opts.keyField || 'id'
+  opts.keyField = opts.keyField || 'value'
   opts.keepMatchChildren = opts.keepMatchChildren !== undefined ?
     opts.keepMatchChildren : true
 
@@ -57,7 +57,7 @@ function set (data, field, arg) {
 
 function navigate (data, method) {
   var tree = data.tree()
-  data.active.set(tree[method]('id', data.active()) || data.active())
+  data.active.set(tree[method]('value', data.active()) || data.active())
 }
 
 function isActive (data, path) {
@@ -82,7 +82,7 @@ function select (data, path) {
 
   store.select(node, data.query())
   data.value.set(store.value())
-  tree.nearestWith('id', data.active())
+  tree.nearestWith('value', data.active())
 }
 
 // helpers
