@@ -1,97 +1,109 @@
-var TreeData = require('./data')
+var NavTree = require('option-tree-navigate')
+var FilterTree = require('option-tree-filter')
+var SelectAction = require('option-select-action')
+
+var Observ = require('observ')
+var ObservArray = require('observ-array')
+var ObservStruct = require('observ-struct')
+var Computed = require('observ/computed')
+
+var arrayEqual = require('array-equal')
 
 module.exports = OptionTree
 
-function OptionTree (data, opts) {
-  var tree, store, filter, state
-
+function OptionTree (initial, opts) {
+  initial = initial || {}
   opts = opts || {}
-  opts.keyField = opts.keyField || 'value'
-  opts.keepMatchChildren = opts.keepMatchChildren !== undefined ?
-    opts.keepMatchChildren : true
 
-  data = TreeData(data, opts)
+  opts.keyField = opts.keyField || 'value'
+  opts.keepMatchChildren = opts.keepMatchChildren !== undefined
+    ? opts.keepMatchChildren : true
+
+  var options = ObservArray(initial.options || [])
+  var filter = Observ(initial.filter || function () { return true })
+  var query = Observ(initial.query || '')
+  var value = ObservArray(initial.value || [])
+  var actions = Observ(initial.actions || {})
+  var active = Observ(null)
+
+  var filtered = Computed([
+    options, filter, query, value
+  ], function (options, fn, query, value) {
+    var filter = FilterTree(options, fn, opts)
+    return filter.query(query, value)
+  })
+
+  var tree = Computed([filtered], function (filtered) {
+    return NavTree(filtered)
+  })
+
+  var store = Computed([actions, value], function (actions, value) {
+    return SelectAction(actions, value, opts)
+  })
 
   // select first item
-  navigate(data, 'nextWith')
+  navigate('nextWith')
 
-  data.filtered(snap)
-  data.value(snap)
-  data.options(snap)
+  // snap on changes
+  filtered(snap)
+  value(snap)
+  options(snap)
 
-  function snap () { navigate(data, 'nearestWith') }
+  function snap () { navigate('nearestWith') }
 
-  return {
-    // exports
-    state: data,
-    // navigation
-    next: navigate.bind(null, data, 'nextWith'),
-    prev: navigate.bind(null, data, 'prevWith'),
-    // selection
-    select: select.bind(null, data),
-    pop: pop.bind(null, data),
-
+  return ObservStruct({
+    channels: {
+      // navigation
+      next: navigate.bind(null, 'nextWith'),
+      prev: navigate.bind(null, 'prevWith'),
+      // selection
+      select: select,
+      pop: pop
+    },
     // queries
-    isActive: isActive.bind(null, data),
+    isActive: isActive,
 
-    // accessors
-    options:  function () { return data.options() },
-    filtered: function () { return data.filtered() },
-    active:   function () { return data.active() },
-    value:    function () { return data.value() },
-    filter:   function () { return data.filter() },
-    actions:  function () { return data.actions() },
+    options: options,
+    value: value,
+    query: query,
+    filter: filter,
+    active: active,
+    actions: actions,
+    filtered: filtered
+  })
 
-    // mutators
-    setActions: set.bind(null, data, 'actions'),
-    setValue:   set.bind(null, data, 'value'),
-    setOptions: set.bind(null, data, 'options'),
-    setQuery:   set.bind(null, data, 'query'),
-    setFilter:  set.bind(null, data, 'filter')
-  }
-}
-
-function set (data, field, arg) {
-  data[field].set(arg)
-}
-
-function navigate (data, method) {
-  var tree = data.tree()
-  data.active.set(tree[method]('value', data.active()) || data.active())
-}
-
-function isActive (data, path) {
-  return arrayEqual(path, data.active())
-}
-
-function pop (data) {
-  var store = data.store()
-  var node = store.pop()
-
-  data.value.set(store.value())
-  return node
-}
-
-function select (data, path) {
-  var tree = data.tree()
-  var node = tree.read(path)
-
-  if (!node) return
-
-  var store = data.store()
-
-  store.select(node, data.query())
-  data.value.set(store.value())
-  tree.nearestWith('value', data.active())
-}
-
-// helpers
-function arrayEqual (a, b) {
-  if (a.length !== b.length) return false
-
-  for (var i = a.length - 1; i >= 0; i--) {
-    if (a[i] !== b[i]) return false
+  function navigate (method) {
+    var t = tree()
+    active.set(t[method]('value', active()) || active())
   }
 
-  return true
+  function select (path) {
+    var t = tree()
+    var node = t.read(path)
+
+    if (!node) return
+
+    var s = store()
+
+    s.select(node, query())
+    value.set(s.value())
+    t.nearestWith('value', active())
+  }
+
+  function pop () {
+    var s = store()
+    var node = s.pop()
+
+    value.set(s.value())
+    return node
+  }
+
+  function isActive (path) {
+    if (!Array.isArray(active())) {
+      return false
+    }
+
+    path = path || []
+    return arrayEqual(path, active())
+  }
 }
